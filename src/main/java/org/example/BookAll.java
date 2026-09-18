@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface BookAll {
-    String getISBN();
+    String getIsbn();
     String getTitle();
     List<String> getAuthors();
     int getYear();
@@ -30,9 +30,9 @@ public interface BookAll {
         } else if (book.getAuthors().stream().anyMatch(a -> a.matches(".*\\d.*"))) {
             errors.add("Имя автора не может содержать цифры.");
         }
-        if (book.getISBN() == null || book.getISBN().trim().isEmpty()) {
+        if (book.getIsbn() == null || book.getIsbn().trim().isEmpty()) {
             errors.add("Отсутствует ISBN книги.");
-        } else if (!book.getISBN().matches("[\\d\\-X]+")) {
+        } else if (!book.getIsbn().matches("[\\d\\-X]+")) {
             errors.add("Некорректный формат ISBN. Допускаются только цифры, дефисы и символ 'X'.");
         }
         if (book.getGenre() == null || book.getGenre().trim().isEmpty()) {

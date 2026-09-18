@@ -49,7 +49,6 @@ public class Main extends Application {
         editButton.setOnAction(event -> handleEdit());
 
         // «Изменить» доступна только для объектов, реализующих Editable
-        // (null тоже даёт false в instanceof, поэтому пустое выделение учтено автоматически)
         table.getSelectionModel().selectedItemProperty().addListener((obs, oldSel, newSel) ->
                 editButton.setDisable(!(newSel instanceof Editable)));
 
@@ -73,7 +72,7 @@ public class Main extends Application {
                         data.getValue() instanceof TextBook ? BookDialog.LABEL_TEXTBOOK : BookDialog.LABEL_BOOK));
 
         TableColumn<BookAll, String> colIsbn = new TableColumn<>("ISBN");
-        colIsbn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getISBN()));
+        colIsbn.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getIsbn()));
 
         TableColumn<BookAll, String> colTitle = new TableColumn<>("Название");
         colTitle.setCellValueFactory(data -> new SimpleStringProperty(data.getValue().getTitle()));

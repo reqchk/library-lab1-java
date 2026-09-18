@@ -3,15 +3,15 @@ import java.util.List;
 
 
 public class Book implements Editable {
-    private String ISBN;
+    private String isbn;
     private String title;
     private List<String> authors;
     private int year;
     private String genre;
     private boolean onHands;
 
-    public Book(String ISBN, String title, List<String> authors, int year, String genre, boolean onHands){
-        this.ISBN = ISBN;
+    public Book(String isbn, String title, List<String> authors, int year, String genre, boolean onHands){
+        this.isbn = isbn;
         this.title = title;
         this.authors = authors;
         this.year = year;
@@ -19,8 +19,8 @@ public class Book implements Editable {
         this.onHands = onHands;
     }
 
-    public void setISBN(String ISBN) { this.ISBN = ISBN; }
-    @Override public String getISBN() { return ISBN; }
+    public void setISBN(String isbn) { this.isbn = isbn; }
+    @Override public String getIsbn() { return isbn; }
 
     public void setTitle(String title) { this.title = title; }
     @Override public String getTitle() { return title; }
@@ -39,7 +39,7 @@ public class Book implements Editable {
 
     @Override
     public String toString() {
-        return "Книга " + title + "\nГод: " + year + "\nЖанр: " + genre + "\nАвторы: " + authors + "\nISBN: " + ISBN +
+        return "Книга " + title + "\nГод: " + year + "\nЖанр: " + genre + "\nАвторы: " + authors + "\nisbn: " + isbn +
                 "\nНа руках: " + (onHands ? "да" : "нет");
     }
 
@@ -50,7 +50,7 @@ public class Book implements Editable {
 
     /** Копирует все поля из другой книги при редактировании в GUI. */
     public void applyFrom(Book source) {
-        this.ISBN = source.ISBN;
+        this.isbn = source.isbn;
         this.title = source.title;
         this.authors = source.authors;
         this.year = source.year;

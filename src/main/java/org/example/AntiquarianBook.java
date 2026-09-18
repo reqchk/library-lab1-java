@@ -15,7 +15,7 @@ public record AntiquarianBook (
         authors = List.copyOf(authors);
     }
 
-    @Override public String getISBN() { return ISBN; }
+    @Override public String getIsbn() { return ISBN; }
     @Override public String getTitle() { return title; }
     @Override public List<String> getAuthors() { return authors; }
     @Override public int getYear() { return year; }

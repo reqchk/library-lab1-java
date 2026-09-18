@@ -1,7 +1,5 @@
 package org.example;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
@@ -10,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -22,10 +21,6 @@ public class BookDialog {
 
     public static final String LABEL_BOOK = "Книга";
     public static final String LABEL_TEXTBOOK = "Учебник";
-
-    private static final String ERR_YEAR = "YEAR";
-    private static final String ERR_COURSE = "COURSE";
-    private static final String ERR_PRINT_RUN = "PRINT_RUN";
 
     private final Dialog<ButtonType> dialog;
     private final ObservableList<BookAll> books; // для проверки уникальности ISBN
@@ -84,7 +79,7 @@ public class BookDialog {
         titleField = new TextField(initial == null ? "" : initial.getTitle());
         titleField.setPromptText("Например: Общий курс физики. Том 1. Механика");
 
-        isbnField = new TextField(initial == null ? "" : initial.getISBN());
+        isbnField = new TextField(initial == null ? "" : initial.getIsbn());
         isbnField.setPromptText("Например: 12-345-67");
 
         genreField = new TextField(initial == null ? "" : initial.getGenre());
@@ -138,7 +133,6 @@ public class BookDialog {
         d.getDialogPane().setContent(grid);
 
         Button okButton = (Button) d.getDialogPane().lookupButton(okType);
-        okButton.disableProperty().bind(createEmptyFieldsBinding());
         okButton.addEventFilter(ActionEvent.ACTION, this::onOk);
 
         return d;
@@ -150,104 +144,80 @@ public class BookDialog {
     }
 
     private void onOk(ActionEvent event) {
-        try {
-            Book candidate = buildBook();
+        List<String> errors = new ArrayList<>();
 
-            BookAll duplicate = findDuplicateByIsbn(candidate.getISBN());
+        collectFormErrors(errors);
+
+        Book candidate = null;
+        if (errors.isEmpty()) {
+            candidate = buildBook();
+
+            BookAll duplicate = findDuplicateByIsbn(candidate.getIsbn());
             if (duplicate != null && duplicate != initial) {
-                errorDialog("Ошибка уникальности данных",
-                        "Книга с ISBN '" + candidate.getISBN() + "' уже существует в каталоге библиотеки.");
-                event.consume();
-                return;
+                errors.add("Книга с ISBN '" + candidate.getIsbn()
+                        + "' уже существует в каталоге библиотеки.");
             }
+            errors.addAll(candidate.validate());
+        }
 
-            List<String> errors = candidate.validate();
-            if (!errors.isEmpty()) {
-                errorDialog("Ошибка валидации данных", String.join("\n", errors));
-                event.consume();
-                return;
-            }
-
-            result = candidate;
-        } catch (NumberFormatException ex) {
+        if (!errors.isEmpty()) {
+            errorDialog("Ошибка валидации данных", String.join("\n", errors));
             event.consume();
-            showNumberError(ex.getMessage());
+            return;
+        }
+
+        result = candidate;
+    }
+
+    private void collectFormErrors(List<String> errors) {
+        if (titleField.getText().trim().isEmpty()) errors.add("Отсутствует название книги.");
+        if (isbnField.getText().trim().isEmpty()) errors.add("Отсутствует ISBN книги.");
+        if (genreField.getText().trim().isEmpty()) errors.add("Отсутствует жанр книги.");
+        if (authorsField.getText().trim().isEmpty()) errors.add("У книги должен быть хотя бы один автор.");
+
+        parseNumber(yearField, "Год издания", errors);
+        if (LABEL_TEXTBOOK.equals(typeBox.getValue())) {
+            parseNumber(courseField, "Курс", errors);
+            parseNumber(printRunField, "Тираж", errors);
         }
     }
 
+    /** Проверяет поле: если пустое или нечисловое, то добавляет ошибку в список. */
+    private static void parseNumber(TextField field, String fieldName, List<String> errors) {
+        String text = field.getText().trim();
+        if (text.isEmpty()) {
+            errors.add("Не заполнено поле '" + fieldName + "'.");
+        } else {
+            try {
+                Integer.parseInt(text);
+            } catch (NumberFormatException e) {
+                errors.add("Поле '" + fieldName + "' должно содержать целое число.");
+            }
+        }
+    }
     private Book buildBook() {
         String isbn = isbnField.getText().trim();
         String title = titleField.getText().trim();
         String genre = genreField.getText().trim();
         List<String> authors = parseAuthors();
-        int year = parseIntOr(yearField, ERR_YEAR);
+        int year = Integer.parseInt(yearField.getText().trim());
         boolean onHands = onHandsCheckBox.isSelected();
 
-        if (isTextBookSelected()) {
-            int course = parseIntOr(courseField, ERR_COURSE);
-            int printRun = parseIntOr(printRunField, ERR_PRINT_RUN);
+        if (LABEL_TEXTBOOK.equals(typeBox.getValue())) {
+            int course = Integer.parseInt(courseField.getText().trim());
+            int printRun = Integer.parseInt(printRunField.getText().trim());
             return new TextBook(isbn, title, authors, year, genre, onHands, course, printRun);
         }
         return new Book(isbn, title, authors, year, genre, onHands);
     }
 
     private List<String> parseAuthors() {
-        return Arrays.stream(authorsField.getText().split(","))
-                .map(String::trim)
-                .filter(a -> !a.isEmpty())
-                .toList();
-    }
-
-    /** Парсит число, при неудаче бросает NFE с маркером поля для showNumberError. */
-    private static int parseIntOr(TextField field, String marker) {
-        try {
-            return Integer.parseInt(field.getText().trim());
-        } catch (NumberFormatException e) {
-            throw new NumberFormatException(marker);
-        }
+        return Arrays.stream(authorsField.getText().split(",")).map(String::trim)
+                .filter(a -> !a.isEmpty()).toList();
     }
 
     private BookAll findDuplicateByIsbn(String isbn) {
-        return books.stream()
-                .filter(b -> b.getISBN().equalsIgnoreCase(isbn))
-                .findFirst()
-                .orElse(null);
-    }
-
-
-    private BooleanBinding createEmptyFieldsBinding() {
-        return Bindings.createBooleanBinding(() -> {
-                    boolean baseEmpty = isBlank(titleField) || isBlank(isbnField) || isBlank(genreField)
-                            || isBlank(authorsField) || isBlank(yearField);
-                    boolean extraEmpty = isTextBookSelected()
-                            && (isBlank(courseField) || isBlank(printRunField));
-                    return baseEmpty || extraEmpty;
-                },
-                typeBox.valueProperty(), titleField.textProperty(), isbnField.textProperty(),
-                genreField.textProperty(), authorsField.textProperty(), yearField.textProperty(),
-                courseField.textProperty(), printRunField.textProperty());
-    }
-
-    private static boolean isBlank(TextField field) {
-        return field.getText().trim().isEmpty();
-    }
-
-    private boolean isTextBookSelected() {
-        return LABEL_TEXTBOOK.equals(typeBox.getValue());
-    }
-
-    private void showNumberError(String marker) {
-        switch (marker) {
-            case ERR_YEAR -> errorDialog("Ошибка ввода: Год издания",
-                    "Поле 'Год издания' должно содержать только целые числа.\nПример: 2014");
-            case ERR_COURSE -> errorDialog("Ошибка ввода: Рекомендуемый курс",
-                    "Поле 'Курс' должно содержать только целое число (от "
-                            + TextBook.MIN_COURSE + " до " + TextBook.MAX_COURSE + ").");
-            case ERR_PRINT_RUN -> errorDialog("Ошибка ввода: Учетный тираж",
-                    "Поле 'Тираж' должно содержать только целое положительное число.");
-            case null, default -> errorDialog("Ошибка числового формата",
-                    "Пожалуйста, проверьте корректность ввода числовых данных.");
-        }
+        return books.stream().filter(b -> b.getIsbn().equalsIgnoreCase(isbn)).findFirst().orElse(null);
     }
 
     private void errorDialog(String title, String content) {

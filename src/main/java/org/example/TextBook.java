@@ -26,7 +26,7 @@ public class TextBook extends Book {
     @Override
     public String toString() {
         return "Учебник " + getTitle() + "\nГод: " + getYear() + "\nЖанр: " + getGenre() + "\nАвторы: " + getAuthors() +
-                "\nISBN: " + getISBN() + "\nКурс: " + getCourse() + "\nТираж: " + getPrintRun() +
+                "\nISBN: " + getIsbn() + "\nКурс: " + getCourse() + "\nТираж: " + getPrintRun() +
                 "\nНа руках: " + (isOnHands() ? "да" : "нет");
     }
 

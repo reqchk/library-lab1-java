@@ -20,7 +20,7 @@ public final class CsvLoader {
         Set<String> usedIsbns = new HashSet<>();
 
         try (var reader = Files.newBufferedReader(file)) {
-            reader.readLine(); // строка заголовка
+            reader.readLine();
 
             String line;
             while ((line = reader.readLine()) != null) {
@@ -30,7 +30,7 @@ public final class CsvLoader {
                     BookAll book = parseLine(line);
 
                     // дубликат ISBN - битая строка, пропускаем
-                    if (!usedIsbns.add(book.getISBN())) {
+                    if (!usedIsbns.add(book.getIsbn())) {
                         continue;
                     }
                     books.add(book);
@@ -111,7 +111,7 @@ public final class CsvLoader {
         }
         String authors = String.join(",", b.getAuthors());
         return String.join(";",
-                type, b.getISBN(), b.getTitle(), authors,
+                type, b.getIsbn(), b.getTitle(), authors,
                 String.valueOf(b.getYear()), b.getGenre(), String.valueOf(b.isOnHands()))
                 + extraFields;
     }
