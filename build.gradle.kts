@@ -18,7 +18,7 @@ java {
 }
 
 javafx {
-    version = "25"
+    version = "23"
     modules("javafx.controls", "javafx.fxml")
 }
 
@@ -29,7 +29,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("org.example.Main")
+    mainClass.set("org.example.LibraryApp")
     applicationDefaultJvmArgs = listOf("--enable-native-access=javafx.graphics")
 }
 

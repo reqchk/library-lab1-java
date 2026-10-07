@@ -1,6 +1,4 @@
-Type;ISBN;Title;Authors;Year;Genre;OnHands;Course;PrintRun
-BOOK;978-5-17-090311-4;Мастер и Маргарита;Булгаков М.;1966;Роман;true;;
-TEXTBOOK;5-93252-001-X;Физика. Механика;Сивухин Д.;2005;Учебная литература;false;1;3000
-ANTIQUARIAN;978-5-699-12034-7;Война и мир;Толстой Л.;1869;Роман;false;;
-BOOK;123456789h;;Автор;2000;Жанр;false;;
-TEXTBOOK;5-93252-001-X;Физика. Механика;Сивухин Д.;2005;Учебная литература;false;1;3000
+TYPE;ISBN;TITLE;AUTHORS;YEAR;GENRE;ON_HANDS;EXTRA1;EXTRA2
+BOOK;5;t;t;6;t;true;;
+TEXTBOOK;978-456;Математика;Иванов;2020;Учебник;true;2;1000
+BOOK;978-222;Преступление;Достоевский;1866;Роман;false;;
